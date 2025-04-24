@@ -18,4 +18,4 @@ www.example.com/message/jusmin # jusmin's message
 
 #### May be add some bot net function
 
-#### FIRST use pynput to make it avaliable on any platform (macOS)
+#### FIRST use pynput to make it avaliable on any platform (macOS) - [DONE]
