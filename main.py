@@ -1,10 +1,13 @@
 import os
 import sys
-from utils import TextBuffer
+from utils import TextBuffer, get_bool
 from pynput import keyboard
-from pynput.keyboard import Key
-DEBUG = True
-text_buffer = TextBuffer()
+from pynput.keyboard import Key, KeyCode
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DEBUG = get_bool(os.environ.get('DEBUG'))
 
 usernames = sys.argv[1:]
 
@@ -12,10 +15,10 @@ usernames.append(os.environ.get("USERNAME"))
 
 usernames.append("undefined")
 
+text_buffer = TextBuffer(usernames)
 
-def on_press(key):
-    global buffer
 
+def on_press(key: KeyCode) -> None or bool:
     try:
         text_buffer.handle_char(key.char)
 
