@@ -17,3 +17,5 @@ www.example.com/message/jusmin # jusmin's message
 #### To save the message if the server is not found yet
 
 #### May be add some bot net function
+
+#### FIRST use pynput to make it avaliable on any platform (macOS)
