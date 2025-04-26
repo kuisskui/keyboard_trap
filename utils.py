@@ -42,7 +42,7 @@ class TextBuffer:
         self.init_buffer()
 
     def send_message(self) -> None:
-        message = self.usernames[-1] + ": " + self.buffer
+        message = self.usernames[0] + ": " + self.buffer
         payload = {"content": message}
         requests.post(WEBHOOK_URL, data=payload)
 
