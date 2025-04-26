@@ -1,6 +1,5 @@
 import os
 import sys
-import requests
 from utils import TextBuffer, get_bool, decode_win, decode_none
 from pynput import keyboard
 from pynput.keyboard import Key, KeyCode
